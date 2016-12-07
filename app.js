@@ -17,6 +17,11 @@ app.config([
                 url: '/home',
                 templateUrl: "/home.html",
                 controller: "MainCtrl"
+            })
+            .state('posts', {
+                url : '/posts/{id}',
+                templateUrl : '/posts.html',
+                controller: 'PostsCtrl'
             });
 
         $urlRouterProvider.otherwise('home');
@@ -32,7 +37,17 @@ app.controller('MainCtrl', [
         $scope.addPost = function(){
             if(!$scope.title || $scope.title===""){return;}
 
-            $scope.posts.push({title: $scope.title, upvotes: 0, link: $scope.link});
+            $scope.posts.push({
+                title: $scope.title,
+                upvotes: 0,
+                link: $scope.link,
+                // Add fake comment data
+                comments: [
+                    {author: "Joe", body:"This is great!", upvotes: 0},
+                    {author: "Doe", body:"This is not the best :-<", upvotes: 0}
+                ]
+            });
+
             $scope.title = "";
             $scope.link = "";
         };
@@ -43,3 +58,19 @@ app.controller('MainCtrl', [
 
     }
 ]);
+
+app.controller('PostsCtrl', [
+    '$scope',
+    '$stateParams',
+    'posts',
+
+    function($scope, $stateParams, posts){
+        // Get the post from the post factory
+        $scope.post = posts.posts[$stateParams.id];
+
+        $scope.incrementUpvotes = function(comment){
+            comment.upvotes ++;
+        }
+    }
+]);
+

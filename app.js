@@ -42,10 +42,7 @@ app.controller('MainCtrl', [
                 upvotes: 0,
                 link: $scope.link,
                 // Add fake comment data
-                comments: [
-                    {author: "Joe", body:"This is great!", upvotes: 0},
-                    {author: "Doe", body:"This is not the best :-<", upvotes: 0}
-                ]
+                comments: []
             });
 
             $scope.title = "";
@@ -71,6 +68,16 @@ app.controller('PostsCtrl', [
         $scope.incrementUpvotes = function(comment){
             comment.upvotes ++;
         }
+
+        $scope.addComment = function(){
+            $scope.post.comments.push({
+                author: $scope.author,
+                body: $scope.body,
+                upvotes: 0
+            });
+
+            $scope.author = "";
+            $scope.body = "";
+        }
     }
 ]);
-

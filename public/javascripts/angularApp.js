@@ -70,6 +70,9 @@ app.controller('PostsCtrl', [
         }
 
         $scope.addComment = function(){
+            if (!$scope.author || $scope.author===""){return}
+            if (!$scope.body || $scope.body===""){return}
+
             $scope.post.comments.push({
                 author: $scope.author,
                 body: $scope.body,

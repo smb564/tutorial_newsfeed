@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 
 // Database models
-require('./models/Posts');
+require('./models/Post');
 require('./models/Comment');
 
 var routes = require('./routes/index');

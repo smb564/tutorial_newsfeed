@@ -1,9 +1,45 @@
 var app = angular.module('flapperNews', ['ui.router']);
 
-app.factory('posts', [function(){
+app.factory('posts', ['$http',function($http){
     var o = {
         posts : []
     };
+
+    o.getAll = function(){
+      return $http.get('/posts').success(function(data){
+          angular.copy(data, o.posts);
+      });
+    };
+
+    o.create = function(post){
+        return $http.post('/posts', post).success(function(data){
+            o.posts.push(data);
+        })
+    };
+
+    o.upvotePost = function(post){
+        return $http.put('/posts/'+post._id+"/upvote").success(function(data){
+            post.upvotes ++;
+        });
+    };
+
+    o.getPost = function(post_id){
+        return $http.get('/posts/'+post_id).then(function(res){
+            return res.data;
+        });
+    };
+
+    o.addComment = function(id, comment){
+        return $http.post('/posts/'+id+'/comments', comment);
+    };
+
+    o.upvoteComment = function(post_id, comment){
+        return $http.put('/posts/'+post_id+'/comments/'+comment._id+'/upvote').success(function(data){
+            // show in the view
+            comment.upvotes ++;
+        });
+    }
+
     return o;
 }]);
 
@@ -16,12 +52,22 @@ app.config([
             .state('home', {
                 url: '/home',
                 templateUrl: "/home.html",
-                controller: "MainCtrl"
+                controller: "MainCtrl",
+                resolve: {
+                    postPromise: ['posts', function(posts){
+                        return posts.getAll();
+                    }]
+                }
             })
             .state('posts', {
                 url : '/posts/{id}',
                 templateUrl : '/posts.html',
-                controller: 'PostsCtrl'
+                controller: 'PostsCtrl',
+                resolve: {
+                    post: ['$stateParams','posts', function($stateParams,posts){
+                        return posts.getPost($stateParams.id);
+                    }]
+                }
             });
 
         $urlRouterProvider.otherwise('home');
@@ -37,12 +83,9 @@ app.controller('MainCtrl', [
         $scope.addPost = function(){
             if(!$scope.title || $scope.title===""){return;}
 
-            $scope.posts.push({
-                title: $scope.title,
-                upvotes: 0,
-                link: $scope.link,
-                // Add fake comment data
-                comments: []
+            posts.create({
+                title : $scope.title,
+                link : $scope.link
             });
 
             $scope.title = "";
@@ -50,7 +93,7 @@ app.controller('MainCtrl', [
         };
 
         $scope.incrementUpvotes = function(post){
-            post.upvotes ++;
+            posts.upvotePost(post);
         };
 
     }
@@ -58,22 +101,27 @@ app.controller('MainCtrl', [
 
 app.controller('PostsCtrl', [
     '$scope',
-    '$stateParams',
     'posts',
-
-    function($scope, $stateParams, posts){
+    'post',
+    function($scope, posts, post){
         // Get the post from the post factory
-        $scope.post = posts.posts[$stateParams.id];
+        $scope.post = post;
 
         $scope.incrementUpvotes = function(comment){
-            comment.upvotes ++;
-        }
+            posts.upvoteComment(post._id, comment);
+        };
 
         $scope.addComment = function(){
             if (!$scope.author || $scope.author===""){return}
             if (!$scope.body || $scope.body===""){return}
 
             $scope.post.comments.push({
+                author: $scope.author,
+                body: $scope.body,
+                upvotes: 0
+            });
+
+            posts.addComment(post._id , {
                 author: $scope.author,
                 body: $scope.body,
                 upvotes: 0

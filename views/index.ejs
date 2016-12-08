@@ -28,7 +28,7 @@
             {{post.upvotes}}
             <!--in ng-repeat while iterating $index keeps track of the index-->
             <span>
-              <a href="#/posts/{{$index}}">Comments</a>
+              <a href="#/posts/{{post._id}}">Comments</a>
             </span>
                 <span style="font-size:20px; margin-left:10px;">
                   <a ng-show="post.link" href="{{post.link}}">

@@ -54,7 +54,11 @@ router.put('/posts/:post/upvote', function(req, res, next){
 
 
 router.get('/posts/:post', function(req, res){
-  res.json(res.post);
+  req.post.populate('comments', function(err, post){
+    if (err) { return next(err); }
+
+    res.json(post);
+  });
 });
 
 
